@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+import distutils.version
 import torch
 from utils.meter import AverageMeter
 from utils.metrics import Evaluator

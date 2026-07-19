@@ -63,6 +63,26 @@ class RDE(nn.Module):
         t_tse_f = self.texual_emb_layer(x, text, atten_t)
         return t_tse_f.float()
 
+    def encode_image_dual(self, image):
+        """Encode BGE and TSE image features in a single CLIP forward pass."""
+        x, atten_i = self.base_model.encode_image(image)
+        i_bge_f = x[:, 0, :].float()
+        i_tse_f = self.visul_emb_layer(x, atten_i).float()
+        return i_bge_f, i_tse_f
+
+    def encode_text_dual(self, text, return_selection=False):
+        """Encode BGE/TSE text features and optionally expose TSE token positions."""
+        text = text.long()
+        x, atten_t = self.base_model.encode_text(text)
+        t_bge_f = x[torch.arange(x.shape[0], device=x.device), text.argmax(dim=-1)].float()
+        if return_selection:
+            t_tse_f, selected_indices = self.texual_emb_layer(
+                x, text, atten_t, return_selection=True
+            )
+            return t_bge_f, t_tse_f.float(), selected_indices
+        t_tse_f = self.texual_emb_layer(x, text, atten_t)
+        return t_bge_f, t_tse_f.float()
+
     def compute_per_loss(self, batch):
         images = batch['images']
         caption_ids = batch['caption_ids']

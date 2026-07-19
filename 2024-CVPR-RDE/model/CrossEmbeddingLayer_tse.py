@@ -58,7 +58,7 @@ class TexualEmbeddingLayer(nn.Module):
         self.mlp = MLP(input_dim, embed_dim // 2, embed_dim, 2)
         self.ratio = ratio
 
-    def forward(self, features, text, atten):
+    def forward(self, features, text, atten, return_selection=False):
         # print(atten) 64 x 77 x 77
         mask =  ((text != 0) + 0)
         lengths = mask.sum(1).view(-1) - 2 # -2 for SOS token and EOS token
@@ -69,7 +69,8 @@ class TexualEmbeddingLayer(nn.Module):
         atten = atten[torch.arange(bs), text.argmax(dim=-1), :] # 64 x 77
         atten = atten * mask
         
-        atten_topK = atten.topk(dim=-1,k = k)[1].unsqueeze(-1).expand(bs,k,features.size(2)) # 64 x k x 512
+        selected_indices = atten.topk(dim=-1, k=k)[1]
+        atten_topK = selected_indices.unsqueeze(-1).expand(bs,k,features.size(2)) # 64 x k x 512
         features = torch.gather(input=features,dim=1,index=atten_topK)  # 64 x k x 512
         features = l2norm(features, dim=-1)
 
@@ -79,7 +80,10 @@ class TexualEmbeddingLayer(nn.Module):
         features = self.mlp(features) + cap_emb
         features = maxk_pool1d_var(features, 1, 1, lengths.to(cap_emb.device))  # max 
         
-        return features.float()
+        features = features.float()
+        if return_selection:
+            return features, selected_indices
+        return features
 
 class VisualEmbeddingLayer(nn.Module):
     def __init__(self, input_dim=512, embed_dim=1024,ratio=0.3):

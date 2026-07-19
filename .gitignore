@@ -1,0 +1,14 @@
+**/__pycache__/
+*.py[cod]
+
+# 权重放到 GitHub Releases，不进入普通 Git
+*.pth
+*.pt
+*.ckpt
+
+# 临时实验输出
+2024-CVPR-RDE/ddi_outputs/
+
+# 密钥文件
+.env
+.env.*
