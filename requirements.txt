@@ -1,0 +1,18 @@
+# Reproduced from the Conda environment used for the experiments.
+# Install a CUDA-compatible PyTorch build before the remaining packages;
+# see README.md for the CUDA 11.1 example.
+torch==1.9.0
+torchvision==0.10.0
+numpy==1.23.5
+Pillow==9.5.0
+PyYAML==6.0
+easydict==1.10
+prettytable==3.7.0
+scikit-learn==1.3.0
+scipy==1.10.1
+matplotlib==3.7.5
+tqdm==4.65.0
+ftfy==6.1.1
+regex==2023.6.3
+requests==2.32.4
+tensorboard==2.13.0
